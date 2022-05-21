@@ -1,0 +1,481 @@
+Temat: Podsystem plików – powłoka, skrypty.  
+Zawartość
+1. Listy warunków	1
+2. Rozwinięcia parametryczne.	1
+3. Funkcje.	3
+4. Polecenia:	5
+5. Debugowanie skryptów.	6
+ZADANIA:	6
+1. Listy warunków
+Lista AND:  
+warunek1  &&  warunek2  &&  warunek3
+np.:
+if  [ $a = „kot” ]   &&  echo TAK    && [  $b –gt 11 ] ...
+Lista OR:  
+warunek1  ||  warunek2  ||  warunek3
+Sprawdzanie – w kolejności od lewej do prawej. Przy OR – pierwszy z lewej prawdziwy – prawda. Np.: - proszę zinterpretować kolejność wykonywania poleceń:
+
+
+
+
+
+
+
+
+
+
+
+if echo ok && ls && pwd
+> then echo ok
+> else echo nie
+> fi
+ok
+a.out     plik22        public_html  skrypt805
+dane.txt  plik33        skrypt1      tekst5.04
+plik11    plik_lseek.c  skrypt2
+/home/mirek
+ok
+
+Blok instrukcji  - ( a ; b ) && ( c ; d; e ) && … - aby w miejscu gdzie może być jedna instrukcja lub zamiast jednej instrukcji chcemy użyć ich zestawu – należy ten zestaw wziąć w nawiasy klamrowe – {  }, np.:
+if  [ $a = „kot” ]   &&  echo TAK    &&  {    
+ls –l | tr –s „ ”   | cut –d” ”   -f1,3 | wc > plik
+cat plik;   echo   DZIALA
+echo ok
+}   <= prawda dla tego co w klamrach będzie wtedy gdy wszystkie polecenia się wykonają poprawnie.
+W warunkach możemy zapisywać alternatywne znaki na danej pozycji – w nawiasach [ ], np.:
+case $a in
+„tak” | „TAK” )    <= opisane wartości („tak” lub „TAK”).
+[tT][aA][kK] )        <= opisane wartości („tak” lub „Tak” lub „tAk” lub „taK” ... – kombinacje liter małych i dużych).
+
+2. Rozwinięcia parametryczne.
+${ parametr:-wartość_domyślna}     - np.:   ${a:-plikZERO} – jeżeli zmienna a nie ma wartości to będzie przyjęta „plikZERO”;
+
+
+
+
+
+
+
+
+
+
+
+
+
+Niech zmienna SCIEZKA ma przypisany jako wartość taki łańcuch:
+/home/jan23/Pliki/projekt1/Pliki/Dane   .
+${ #parametr }    - podaje długość parametru, tzn. jakiej długości łańcuch tekstowy jest zawarty w zmiennej;
+
+${ parametr%słowo* }    -usuwa z łańcucha od końca najmniejszą część parametru do słowa włącznie z nim, resztę przypisuje, np.:   
+zmienna SCIEZKA ma przypisany jako wartość taki łańcuch:
+/home/jan23/Pliki/projekt1/Pliki/Dane,
+wyrażenie:
+${ SCIEZKA%Pliki* }  da wynik: /home/jan23/Pliki/projekt1/         ;
+[miroslaw.zuzel@orfi ~]$ echo ${SCIEZKA%Pliki*}
+/home/jan23/Pliki/projekt1/
+Usunięcie ze znakiem „/”:
+[miroslaw.zuzel@orfi ~]$ echo ${SCIEZKA%/Pliki*}
+/home/jan23/Pliki/projekt1
+
+${ parametr%%słowo* }    -usuwa z łańcucha od końca najdłuższą część parametru do słowa włącznie z nim, resztę przypisuje, np.:   
+zmienna SCIEZKA ma przypisany jako wartość taki łańcuch:
+/home/jan23/Pliki/projekt1/Pliki/Dane,
+wyrażenie:
+${ SCIEZKA%%Pliki* }  da wynik: /home/jan23/       ;
+
+${ parametr#*słowo }    -usuwa z łańcucha od początku najmniejszą część parametru do słowa włącznie z nim, resztę przypisuje, np.:   
+zmienna SCIEZKA ma przypisany jako wartość taki łańcuch:
+/home/jan23/Pliki/projekt1/Pliki/Dane,
+wyrażenie:
+${ SCIEZKA#*Pliki }  da wynik: /projekt1/Pliki/Dane;
+Usunięcie symbolu „/”:   echo ${SCIEZKA#*Pliki/}
+projekt1/Pliki/Dane  .
+${ parametr##*słowo }    -usuwa z łańcucha od początku najdłuższą część parametru do słowa włącznie z nim, resztę przypisuje, np.:   
+zmienna SCIEZKA ma przypisany jako wartość taki łańcuch:
+/home/jan23/Pliki/projekt1/Pliki/Dane,
+wyrażenie: ${ SCIEZKA##*Pliki }  da wynik: /Dane    .
+
+
+
+
+
+
+
+
+
+
+
+[miroslaw.zuzel@orfi ~]$ echo ${SCIEZKA##*Pliki}
+/Dane
+[miroslaw.zuzel@orfi ~]$ echo ${SCIEZKA##*Pliki/}
+Dane
+
+Łączenie łańcuchów:
+ d=$HOME/DANE
+ echo $d
+/home/WMII/miroslaw.zuzel/DANE
+
+3. Funkcje.
+Funkcje w skrypcie definiujemy przed skryptem głównym:
+#!/bin/bash
+fun1 () {
+echo DZIALA FUN1
+}
+echo „SKRYPT glowny”
+fun1   abc kot pies   #  wywołanie funkcji – z parametrami funkcji
+echo „GLOWNY – koniec”
+exit 0
+Wynik:
+SKRYPT glowny
+DZIALA FUN1
+GLOWNY – koniec
+
+Zmienne globalne i lokalne – zmienna zdefiniowana w skrypcie głównym lub funkcji jest globalną – widzialną w skrypcie głównym oraz funkcji.
+Skrypt:
+ #!/bin/bash
+ 2 fun1 () {
+ 3 echo DZIALA FUN1
+ 4 pp33=NOGA
+ 5 echo "pp33="$pp33
+ 6 }
+ 7 echo „SKRYPT glowny”
+ 8 echo "pp33="$pp33
+ 9 fun1      #  wywołanie funkcji
+10 echo "pp33="$pp33
+11 echo „GLOWNY – koniec”
+12 exit 0
+
+się wykona:
+ ./FF1
+„SKRYPT glowny”
+DZIALA FUN1
+„GLOWNY – koniec”
+[miroslaw.zuzel@orfi ~]$ nano FF1
+[miroslaw.zuzel@orfi ~]$ ./FF1
+„SKRYPT glowny”
+pp33=                    <== zmienna jeszcze nie istnieje – pojawia się dopiero w funkcji
+DZIALA FUN1
+pp33=NOGA
+pp33=NOGA
+„GLOWNY – koniec”
+
+
+
+
+
+
+
+
+
+
+
+
+
+Funkcja może zwracać wartości poprzez zmienne – jako ich wartości (można stosować return – do liczb, ale do przekazywania  łańcuchów tylko zmienne).
+Przykład wykorzystania return:
+ #!/bin/bash
+ fun1 () {
+ echo DZIALA FUN1
+return 33
+  }
+ echo „SKRYPT glowny”
+fun1      #  wywołanie funkcji
+echo $?  # wartość zwrócona przez return
+echo „GLOWNY – koniec”
+
+Aby zmienna w funkcji była lokalna trzeba  „przesłonić” zmienną ze skryptu głównego nową definicją – polecenie local , np.:
+#!/bin/bash  
+zm22=”kotki dwa”
+fun1 () {
+echo DZIALA F1
+local  zm22=22
+echo w fun1 -zm22=$zm22
+}
+echo „SKRYPT glowny”
+echo W GLOWNYM-ZM22=$zm22
+fun1
+echo GLOWNY - koniec  .
+
+Przykład z przekazywaniem parametrów (między nawiasami po fun1 nic nie piszemy):
+Przykład – nazwa skryptu „param”:
+ #!/bin/bash
+ f1(){
+ echo f1
+ echo $*
+ echo $1
+ }
+ echo skrypt
+ f1   22    KOT    pies
+echo parametry skryptu: $*
+echo $1
+
+Uruchomienie:
+[miroslaw.zuzel@orfi ~]$ ./param   hhh    qqq    1111
+skrypt
+f1
+22 KOT pies
+22
+parametry skryptu: hhh qqq 1111
+hhh
+
+Inny przykład:
+#!/bin/bash
+fun1 () {
+echo DZIALA FUN1
+echo „w fun1:” $* $0
+echo „w fun1:” $1 $2
+}
+echo „SKRYPT glowny”
+echo „jego parametry:” $*   #       Ala pies lis
+fun1            do fun1 przekazujemy $1  $3   $4  # parametry przekazywane do funkcji
+
+#w funkcji: $1  $2              $3          $4 $5 $6
+echo „GLOWNY – koniec”
+exit 0
+Zapisujemy do pliku „skr1”.
+Uruchamiamy:
+./skr1   Ala kot pies lis 123 aha      .
+Proszę zwrócić uwagę na parametry – w skrypcie głównym są inne niż w funkcji.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Możemy instrukcję pisać w kilku wierszach  - na końcu każdego poza ostatnim wierszem wstawiamy znak „\” – kontynuacji, np.:
+./skr1   Ala kot pies lis 123 aha      \
+  Alibaba  222 888    \
+ptak szpak .
+Zadanie.
+1.Skrypt wywołuje funkcję, która pobiera dwie liczby jako parametry (tryb wsadowy), oblicza ich sumę, wynik zwraca za pomocą return. Wszystkie wartości wyświetlić.
+2.Skrypt wywołuje funkcję, która na zmiennych lokalnych oblicza sumę i iloczyn wartości przekazanych do niej jako parametry funkcji - tryb wsadowy, następnie obliczone wartości przekazuje do skryptu głównego. Wartości do skryptu też przekazuje się jako parametry - tryb wsadowy.
+3. Napisać skrypt, który pobiera 2 parametry – pierwszy – opcja wyboru (jedna z trzech), drugi – nazwa pliku albo katalogu. Skrypt w zależności od wartości pierwszego parametru:
+- jeżeli 1 – to sprawdza czy istnieje katalog o nazwie podanej jako drugi parametr, jeżeli istnieje to
+go usuwa, jeżeli nie - to go tworzy;
+- jeżeli 2 – zapisuje do pliku o nazwie  podanej jako drugi parametr wartość zmiennej $HOME
+- jeżeli 3 – komunikat - „FUNKCJA 3”
+wywołuje odpowiednią funkcję i przekazuje jej odpowiednie wartości.
+
+4. Polecenia:
+A) eval   <= pozwala otrzymać ”wartość wartości zmiennej” – np.:
+zm1=10
+x=zm1
+y=’$’$x     mamy otrzymać łańcuch: znak ‘$’  + wartość w zmiennej x – „zm1” , co razem daje łańcuch  				„$zm1”
+echo $y
+da w wyniku łańcuch $zm1   ,
+natomiast:
+zm1=10
+x=zm1
+eval   y=’$’$x   <== przypisanie wartości zmiennej zm1 do zmiennej y
+echo $y
+da w wyniku 10   .
+[miroslaw.zuzel@orfi ~]$ zm1=10
+[miroslaw.zuzel@orfi ~]$ echo $zm1
+10
+[miroslaw.zuzel@orfi ~]$ x=zm1
+[miroslaw.zuzel@orfi ~]$ echo $x
+zm1
+[miroslaw.zuzel@orfi ~]$ y='$'$x
+[miroslaw.zuzel@orfi ~]$ echo $y
+$zm1
+[miroslaw.zuzel@orfi ~]$ eval y='$'$x
+[miroslaw.zuzel@orfi ~]$ echo $y
+10
+[miroslaw.zuzel@orfi ~]$
+
+B) exit n    <=zwraca kod:
+0 - =sukces
+1-125 – kody błędów
+126 – plik nie był wykonywalny
+127 – polecenie nie było znalezione
+128-255 – pojawił się sygnał o numerze ...   .
+
+C)  echo – np.:
+echo „slowo”
+echo –n „tekst w tej samej linii co slowo”  <= czasami używa się –e.
+Opcja -e powoduje że interpretowane są znaki:
+\b - backspace
+\n - nowa linia
+\r - powrót karetki
+\t - tabulator
+\\ - backslash
+
+D) inne: break, continue, . (kropka) – wykonanie polecenia w bieżącej powłoce (normalnie gdy skrypt wykonuje zewnętrzne polecenie lub skrypt, tworzone jest nowe środowisko – uruchamiany kolejny shell), exec, export, return – funkcja zwraca jedną liczbę, set, shift, trap, ... .
+
+5. Debugowanie skryptów.
+Wykorzystałem książkę „Neil Matthew , Richard Stones – Linux. Programowanie. W-wa 1999”.
+Można za pomocą komunikatów pomocniczych – echo.
+Przykład skryptu:
+cat skr09
+
+#!/bin/bash
+echo dziala skr09
+echo ala
+ls-l
+tree-d
+echo a=$a          # zmienna a nie ma wartości
+echo koniec
+
+ Zwykłe wykonanie skryptu:
+[miroslaw.zuzel@orfi ~]$  ./skr09
+dziala skr09
+ala
+./skr09: line 4: ls-l: command not found
+./skr09: line 5: tree-d: command not found
+a=       <== ma być wartość a
+koniec
+[miroslaw.zuzel@orfi ~]$
+Można ustawić opcje w poleceniu (wierszu) #!/bin/bash -  opcja :
+-e powoduje zamknięcie powłoki gdy działanie prostego polecenia zakończy się niepowodzeniem:
+#!/bin/bash -e
+[miroslaw.zuzel@orfi ~]$  ./skr09
+./skr09
+dziala skr09
+ala
+./skr09: line 4: ls-l: command not found    <== bład w tej linii , następna „tree-d” się nie wykonuje
+[miroslaw.zuzel@orfi ~]$ echo $?
+127
+
+-u – nounset – komunikat błędu i zamknięcie powłoki gdy skrypt próbuje użyć niezdefiniowanej zmiennej:
+ #!/bin/bash -u
+[miroslaw.zuzel@orfi ~]$  ./skr09
+dziala skr09
+ala
+./skr09: line 4: ls-l: command not found
+./skr09: line 5: tree-d: command not found
+./skr09: line 6: a: unbound variable
+[miroslaw.zuzel@orfi ~]$
+
+-x – włączenie debuggera:
+#!/bin/bash -x
+[miroslaw.zuzel@orfi ~]$  ./skr09
++ echo dziala skr09
+dziala skr09
++ echo ala
+ala
++ ls-l
+./bbb: line 4: ls-l: command not found
++ tree-d
+./bbb: line 5: tree-d: command not found
++ echo a=
+a=
++ echo koniec
+koniec
+[miroslaw.zuzel@orfi ~]$
+
+Po zdefiniowaniu zmiennej a:
++ echo dziala skr09
+dziala skr09
++ echo ala
+ala
++ ls-l
+./bbb: line 4: ls-l: command not found
++ tree-d
+./bbb: line 5: tree-d: command not found
++ a=33
++ echo a=33  <== w tym miejscu polecenie wygląda tak : echo a=$a, debugger podstawia zamiast 			zmiennej wartość
+a=33
++ echo koniec
+koniec
+
+Zmodyfikowany skrypt:
+ #!/bin/bash
+ 2 set -x
+ 3 echo dziala skr09
+ 4 echo ala
+ 5 a=1
+ 6 echo $0 $1
+ 7 b=2
+ 8 c=$[$a+$b]
+ 9 ls-l
+10 echo c=$c
+11 echo d=$d
+
+[miroslaw.zuzel@orfi ~]$ ./skr09   UUUUUU
+./skr09   UUUUUU
++ echo dziala skr09
+dziala skr09
++ echo ala
+ala
++ a=1
++ echo ./skr09 UUUUUU
+./skr09 UUUUUU
++ b=2
++ c=3
++ ls-l
+./skr09: line 9: ls-l: command not found
++ echo c=3
+c=3
++ echo d=
+d=
+[miroslaw.zuzel@orfi ~]$
+
+Można ustawić opcje powłoki albo użyć polecenia set  - z opcjami –eux, z niezdefiniowaną zmienną A i opcjami, ze zmienną A i wyłączonymi opcjami – jak ostatni wariant skryptu:
+ 
+Nie wszystkie poniżej opisane opcje zadziałały (-n), opcje dla powłoki  - nie.
+Opcje wiersza poleceń		Opcje powłoki 		Opis
+
+sh –n  <skrypt>			set  -o  noexec		Szuka błędów składni nie wykonując poleceń
+				set  –n
+sh –v  <skrypt>			set  -v  verbose		Powtarza polecenia przed ich wykonaniem
+				set  –v
+sh –x  <skrypt>			set  -o  xtrace		Powtarza polecenia po ich wykonaniu  
+				set  –x			w wierszu poleceń
+				set  -o  nounset		Podaje komunikat błędu gdy wykonywana   
+				set  –u			jest niezdefiniowana zmienna
+
+Przykład użycia opcji powłoki w skrypcie i efekt:
+ #!/bin/bash
+ 2 set -x
+ 3 echo dziala skr09
+ 4 echo ala
+ 5 ls-l
+ 6 tree-d
+ 7 echo $a
+[miroslaw.zuzel@orfi ~]$ ./skr09
+./skr09
++ echo dziala skr09
+dziala skr09
++ echo ala
+ala
++ ls-l
+./skr09: line 5: ls-l: command not found
++ tree-d
+./skr09: line 6: tree-d: command not found
++ echo
+
+[miroslaw.zuzel@orfi ~]$
+
+Można włączyć znaczniki opcji polecenia set za pomocą opcji:   -0 <=włącza, +0 <=wyłącza.
+Przy wstępnym sprawdzaniu wystarczą opcje wiersza poleceń.
+Przy dokładniejszym sprawdzaniu skryptu warto umieszczać opcję xtrace wewnątrz skryptu – włączać ją dla szczególnych fragmentów.
+
+ZADANIA:
+1. Napisać polecenie, które sprawdza czy wszystkie warunki zachodzą – w katalogu bieżącym jest plik „dane.txt”, plik „kopia” jest niezerowy, zmienna $a ma wartość 5 i wynik polecenia echo OK jest poprawny.
+2.  Napisać polecenie, które sprawdza czy jeden z warunków zachodzi – w katalogu bieżącym jest plik „dane.txt”, plik „kopia” jest niezerowy, zmienna $a ma wartość 5 i wynik polecenia echo OK jest poprawny.
+3. Dla ścieżki „/home/jan23/Dane/Projekt_22/Dane/Pliki” :
+- wyciąć część do podkatalogu „Dane” pierwszego od lewej , resztę przypisać do zmiennej a;
+- wyciąć część do podkatalogu „Dane” pierwszego od prawej , resztę przypisać do zmiennej a;
+- zostawić część do podkatalogu „Dane” pierwszego od lewej i przypisać do zmiennej a, resztę wyciąć;
+- zostawić część do podkatalogu „Dane” pierwszego od prawej i przypisać do zmiennej a, resztę wyciąć;
+- ustalić długość łańcucha opisującego ścieżkę;
+- dla zmiennej b przypisać wartość domyślną  – ścieżkę dostępu do katalogu domowego.
+4. Napisać skrypty, który zawierają:
+-funkcję która zawiera zmienną lokalną zm1, której nadaje wartość 11, potem do ją dodaje do zmiennej globalnej bb1, skrypt zawiera zmienne: zm1 z nadaną wartością 33 i bb1 z wartością 7;
+-funkcję która wyświetla pobrane parametry, skrypt główny wczytuje przy uruchamianiu trzy parametry, dwa ostatnie z nich przekazuje do funkcji, oprócz tego przekazuje dwie liczby: 122 i 34;
+-funkcję wczytującą dwie wartości – liczby i obliczającą ich sumę, funkcja przekazuje wartość sumy do skryptu głównego.
+5. Utworzyć skrypt zawierający polecenia: wyświetl ścieżkę dostępu do katalogu bieżącego, zapisz ją do zmiennej a, do zmiennej b zapisz – ile zwykłych plików zawiera katalog domowy. Skrypt wczytuje wartość – jeżeli wczytał:
+1- ma utworzyć na nowo plik o nazwie „Dane”, do którego zapisze strukturę katalogu domowego,
+2- ma policzyć podkatalogi w katalogu domowym do podpoziomu 3
+3- ma wyświetlić zawartość katalogu domowego.
+Do diagnostyki skryptu zastosować debuggera.

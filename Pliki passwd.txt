@@ -1,0 +1,74 @@
+Pliki /etc/passwd i  /etc/group:
+- /etc/passwd – zawiera inf. o zdefiniowanych użytkownikach
+- /etc/group - zawiera inf. o zdefiniowanych grupach użytkowników
+w systemie.
+Passwd:
+Zapis w wierszu: login, x- jest hasło, UID – User ID, GID – Group ID, miejsce na opis użytkownika, katalog domowy, domyślnie uruchamiany shell.
+Group:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Zapis w wierszu: nazwa grupy,  x -  jest hasło, GID – Group ID.
+
+Polecenia: cut, tr.
+Jeżeli mamy pewien tekst – to czasami mamy potrzebę np. wyselekcjonowania loginów, nr użytkowników (UID) i ich katalogów domowych:
+
+user15:x:31561:31561::/home/user15:/bin/bash
+user16:x:31562:31562::/home/user16:/bin/bash
+user17:x:31563:31563::/home/user17:/bin/bash
+user18:x:31564:31564::/home/user18:/bin/bash
+user19:x:31565:31565::/home/user19:/bin/bash
+
+Podejście – rozbijamy tekst na wiersze. W każdym wierszu poszczególne wyrazy są oddzielone znakiem dwukropka. Możemy te wyrazy ponumerować. Dla każdego wiersza mamy wybrać wyrazy o numerach: 1,3,6.
+Do tego służy polecenie cut.
+Składnia:
+cut c1-34  <= wycina w każdym wierszu znaki o nr-ach od 1 do 34
+cut -d”:”  -f1,3,6   <= wycina w każdym wierszu wyrazy (pola) o nr-ach 1,3,6 traktując jako separator znak : (dwukropek).
+cat /etc/passwd | cut -d”:”  -f1,3,6
+
+ cat /etc/passwd | cut -d":" -f1,3,5
+user15:31561:/home/user15
+user16:31562:/home/user16
+user17:31563:/home/user17
+user18:31564:/home/user18
+user19:31565:/home/user19
+
+Aby zamienić w wyniku : na spację:
+ cat /etc/passwd | cut -d":" -f1,3,5 | tr ":" " "
+user15 31561 /home/user15
+user16 31562 /home/user16
+user17 31563 /home/user17
+user18 31564 /home/user18
+user19 31565 /home/user19
+
+Trochę problemów jest z wynikiem polecenia ls -l:
+-rw-r--r-- 1 miroslaw.zuzel domain users  180 mar 18 16:32 tekst5.04
+-rw-r--r-- 1 miroslaw.zuzel domain users   73 mar 11 17:16 TRESC22
+-rw-r--r-- 1 miroslaw.zuzel domain users   31 mar 10 13:54 WSZYSTKO
+
+Separatory – jedna alb więcej spacji.
+Trzeba użyć polecenia:
+tr -s „ ”  <=zamienia szereg znaków zawartych w cudzysłowie na jeden.
+
+      Spacja
+
+ls -l | tr -s „ ”
+Żeby wyciąć prawa dostępu, rozmiar i nazwę:
+-rw-r--r-- 1 miroslaw.zuzel domain users 180 mar 18 16:32 tekst5.04
+-rw-r--r-- 1 miroslaw.zuzel domain users 73 mar 11 17:16 TRESC22
+-rw-r--r-- 1 miroslaw.zuzel domain users 31 mar 10 13:54 WSZYSTKO
+
+ls -l  | tr -s „ ” |  cut -d” ”  -f1,6,10

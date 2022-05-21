@@ -1,0 +1,117 @@
+Temat: Ilustracja operacji na pliku - program „plik_lseek.c”.
+
+1. Funkcje systemowe do operacji na pliku.
+Funkcje systemowe do obsługi pliku: otwórz, odczytaj, zapisz, zamknij.
+Po odnalezieniu i-węzła odpowiedzialnego za plik w PAO tworzona jest przez SO jego kopia – w strukturze systemowej odpowiedzialnej za zarządzanie otwartymi przez SO plikami.
+Następnie plik jest otwierany – w odpowiednim trybie, wykonywane są operacje na nim, po tym plik jest zamykany.
+ // Dane w pliku są zapisane sekwencyjnie (dostęp do następnego zapisu po odczytaniu
+// poprzedniego). Po otwarciu pliku do odczytu – na początku dostępny jest pierwszy zapis  //- tzw. wskaźnik pozycji jest na początku, po otwarciu do zapisu – na początku, odczytu i 
+// zapisu  – na początku, dopisywania (dla plików tekstowych) – na końcu.
+     wskaźnik										   wskaźnik
+
+
+
+Schemat 1. Plik o strukturze wewnętrznej i położenie wskaźnika przy różnych sposobach otwarcia.
+
+     wskaźnik										   wskaźnik
+
+
+
+Schemat 1. Plik – strumień bitów, położenie wskaźnika przy różnych sposobach otwarcia.
+
+W języku C/C++ można wykorzystywać funkcje obsługi plików – są zestawy tych funkcji operujące na kilku poziomach:
+-zestaw funkcji poziomu najniższego (najbliższy poziomowi funkcji systemu operacyjnego): creat, open close, read, write, lseek,
+-zestaw funkcji wyższego poziomu – poziom strumieni: fopen, fclose, fprintf, fscanf, fgetc, fgets, fput, fseek, ... .
+
+// Funkcja lseek  pozwala przestawić ten wskaźnik bez konieczności odczytu. Opis funkcji –
+// w programie. Można sprawdzić czy plik istnieje – ls, obejrzeć zawartość – cat.
+
+2. Co należy zrobić z plikiem z kodem źródłowym.
+1. Pobieramy „plik lseek.c” z folderu „Programy – procesy” ze strony:
+wmii.uwm.edu.pl/~mirek  .
+Przesyłamy plik  zawierający program na swoje konto na serwerze orfi za pomocą jakiegoś narzędzia ftp, np. WinSCP :
+uruchamiamy WinSCP, wpisujemy nazwę serwera:
+orfi.uwm.edu.pl, logowanie – jak na putty, przenosimy pliki z kodami źródłowymi z pulpitu na orfi-ego.
+
+2. Dokonujemy kompilacji źródła na plik wykonywalny:
+gcc  <nazwa pliku>   (g++ – kompilator języka C++, gcc – języka C) - plik wynikowy ma domyślną  nazwę „a.out”, lub:
+gcc –o  <nazwa pliku wynikowego>  <nazwa pliku źródłowego>   , np.:
+ gcc  -o  pr1 pr1.c    
+gcc  -o   pr1  pr.1h   pr1.c   <= kompilacja z plikiem bibliotecznym
+3. Uruchomienie:
+ ./a.out
+./pr1
+
+Domyślnie uruchamiamy procesy w terminalu synchronicznie -
+terminal jest związany z procesem – nie możemy podać polecenia
+poza procesem.
+Jest możliwe uruchomienie procesu w trybie asynchronicznym.
+Np.:
+- synchronicznie:
+./a.out
+- asynchronicznie:
+./a.out &
+Polecenia fg i bg pozwalają na zmianę trybu (fg – przywrócenie wykonania synchronicznego, bg odwrotnie).
+
+3. Opis kodu w pliku „plik_lseek.c”.
+W programie „plik_lseek.c” przedstawiono użycie funkcji poziomu niższego.
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
+main()
+{
+ int a,ilosc;
+ int plik1;
+ char wyraz[21];
+ a=99;
+ printf("program 1 \n a=%d\n",a);
+plik1=creat("dane.txt",0666);       <=tworzony jest plik "dane.txt" w bieżącym katalogu z prawami
+				dostępu 666
+ ilosc=write(plik1,"To jest tekst.",20);  <== do nowo utworzonego pliku jest możliwy zapis  
+zapisywany jest tekst "To jest tekst.", 20 – max ilość zapisywanych znaków, funkcja write zwraca ilość zapisanych znaków,
+				można sprawdzić zawartość pliku z poziomu systemu – polecenie cat
+ printf("Zapisano %d znakow\n",ilosc);
+ close(plik1);			<== plik jest zamykany
+ plik1=open("dane.txt",O_RDWR,0);  <== plik jest otwierany w trybie zapis/odczyt
+ if (plik1==-1) printf("Blad otwarcia do odczytu\n");
+ ilosc=write(plik1,"A to o kocie Ali.",20);     <== zapis do pliku tekstu "A to o kocie Ali."
+ printf("Zapisano %d znakow\n",ilosc);
+ ilosc=write(plik1,"Oraz o innych zwierzakach.",20);  <== zapis do pliku tekstu "Oraz o innych
+							zwierzakach."
+ printf("Zapisano %d znakow\n",ilosc);
+ lseek(plik1,0L,0);  <== ustawienie wskaźnika do pliku (tzn. który zapis w pliku jest teraz dostępny)
+na początku pliku (w pliku tekstowym 1 zapis= 1 znak, w innych 1 zapis będzie miał rozmiar zapisu tworzonego przy operacji write)
+ /* lseek - trzeci arg. - odmierzanie wartosci drugiego  od
+ 0 - poczatku, 1 -biezacej poz. wskaznika, 2-konca pliku*/
+ do    <== odczyt całego pliku  - w pętli
+ {
+ ilosc=read(plik1,wyraz,20);
+ printf("Odczytano %d znakow\n", ilosc);
+ printf("Odczytane: %s\n",wyraz);
+ }while(ilosc!=0);
+ lseek(plik1,-20L,2); <== ustawienie wskaźnika do pliku 20 znaków od końca pliku
+ ilosc=read(plik1,wyraz,20);  <== odczyt ostatnich 20 znaków z pliku
+ printf("Ostatni Odczyt - po lseek: %d znakow\n", ilosc);
+ printf("Odczytane: %s\n",wyraz);
+ close(plik1);
+ printf("Aby zakonczyc Wpisz liczbe:");
+ scanf("%d",&a);
+}
+Wynik działania programu:
+ 
+
+4. Zadanie:
+1.Sprawdzić czy istnieje plik „dane.txt”, jaką ma zawartość.
+2.W programie proszę dodać kod który dopisze do pliku na końcu tekst „To zapis o psie Ali”.
+UWAGA – wariant wykonania:
+-trzeba ustawić znacznik na końcu pliku, następnie dopisać (kopiować można do nano) - tekst poniżej – przed poleceniem zamknięcia pliku (close):
+
+ lseek(plik1,0L,2);
+ ilosc=write(plik1,"To zapis o psie Ali\n",20);
+ printf("Zapisano %d znakow\n",ilosc);
+
+
+Tryby otwarcia pliku: O_WRONLY – wtedy wskaźnik do pliku ustawia się na jego początku, przy O_RDONLY i O_RDWR – na początku.
+3. Sprawdzić co się stanie z zawartością pliku gdy przy otwartym w trybie O_RDWR znacznik ustawimy na początku i zapiszemy tekst „NOWA TREŚĆ”.
+4. Jako drugi w pliku proszę umieścić zapis: „DRUGI”.

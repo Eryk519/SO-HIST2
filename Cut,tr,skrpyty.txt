@@ -1,0 +1,305 @@
+Temat: Shell – konstrukcje strukturalne – cd., skrypty.
+Spis treści
+1.	Ważne szczegóły składni:	1
+2.	Konstrukcja wielokrotnego wyboru:	1
+3.	Zadania:	2
+4.	Przykłady pętli:	2
+-while	2
+-until	2
+-for	3
+5.	Zadania:	4
+6.	Skrypty	5
+
+1.	Ważne szczegóły składni:
+a=7
+unset d
+Polecenie
+echo $a	
+dało wynik
+7
+polecenie
+echo $d
+dało wynik
+             <= (pusty wiersz – oznacza brak zmiennej w powłoce) .
+Konstrukcja:
+if  [ $a = $d ]; then echo TAK; else echo NIE; fi
+sprowadza się do po podstawieniu wartości zmiennych do zapisu:
+if  [ 7 =       ]; then echo TAK; else echo NIE; fi
+
+             NIC (brak wartości)
+Będzie błąd.
+W konstrukcjach gdzie występują warunki jeżeli nie wiemy czy zmienna istnieje  bezpieczniej jest zmienne brać w cudzysłów, np.:
+d=kot
+unset a
+if [ „$a”  =  „$d”  ]
+then echo OK
+fi
+Jeżeli nie wiemy czy dana zmienna istnieje taki zapis nie spowoduje błędu zapisu – jeżeli np. nie ma zmiennej a to shell zamiast niej wstawi się NIC, co zawarte w cudzysłowie da zapis ”” - czyli łańcuch  pusty. Porównanie łańcucha pustego z niepustym:
+if  [  „”  = „kot”  ]
+da jakiś wynik logiczny – autor konstrukcji będzie musiał ustalić czy słuszny, ale błędu nie będzie.
+Bez cudzysłowu by było:
+    =  „kot”  <= z lewej strony znaku porównania NIC nie ma – błąd – brak operatora jednoargumentowego (naprawdę brak jednego z operandów).
+
+Zastosowanie cudzysłowów ma sens dla tekstów  - nie daje efektów dla porównań liczb.
+
+
+
+2.	Konstrukcja wielokrotnego wyboru:
+Przykład:
+case „$zmienna”  in
+   „to tekst”)  echo tekst; pwd;;
+   1 | 2 | 3 ) echo liczba;  ls;;
+   but) echo but
+           echo kapec;;
+   co??) echo co-4-znakowe;;   <= konwencja: ? = 1znak
+   co*) echo co*;;
+   *)  echo cala reszta;;
+esac
+
+Generalnie wartość zmiennej traktowana jest jako tekst:
+zmienna=99999999999999489986969696758668698
+echo $zmienna
+99999999999999489986969696758668698
+
+Konstrukcje: $((  )) lub $[  ] pozwalają dokonywać operacji arytmetycznych na zmiennych jako liczbach, np.:
+a=1
+b=$(($a+5))
+echo b=$b
+b=6
+3.	Zadania - case:
+1.  Do zmiennej powłoki proszę wpisać pewne słowo – do zmiennej, następnie utworzyć konstrukcję, która sprawdzi, czy wpisane słowo to:
+-”kot” – jeżeli tak to ma się wykonać polecenie ls,
+-”lato” lub „karo” - jeżeli tak – to wypisać komunikat „Opcja2” oraz
+wykonać polecenie tree,
+-lis – jeżeli tak – wyświetlić nazwę bieżącego katalogu,
+-inne – komunikat „Inna opcja” oraz wyświetlić swój login.  
+
+
+
+
+
+
+
+
+
+
+4.	Przykłady pętli:
+-while
+a=1
+while [ $a -le 6 ]
+do
+   echo $a
+   a=$(($a+1))
+done
+Pętla wykonuje się dopóki warunek się spełnia. Warunek jest sprawdzany na początku pętli.
+-until
+a=1
+until [ $a -gt 6 ]
+do
+   echo $a
+   a=$(($a+1))
+done
+Pętla wykonuje się dopóki warunek się nie spełnia (jak się spełni następuje przerwanie pętli). Warunek jest sprawdzany na początku pętli.
+-for
+for  a  in  Ala kot pies 123 889 abc123  <= zmienna a przyjmuje wartości   z listy
+do
+echo $a
+done
+
+for  a  in  * <= odwołanie się do zawartości bieżącego katalogu.
+do	        (* - filtr na nazwy plików, można użyć też: ?, [a-k,m,t]
+echo $a            -  np. ??[a-d,k]* )
+done  
+
+NP.:
+for a  in *; do echo a=$a; ls -l "$a"; done
+...
+a=Zad1
+-rwx------ 1 miroslaw.zuzel domain users 238 kwi  8  2019 Zad1
+a=Zad3
+-rwx------ 1 miroslaw.zuzel domain users 232 kwi 10  2019 Zad3
+...
+for a in d*; do echo a=$a; ls -l $a;  done
+a=dane
+-rw-r--r-- 1 miroslaw.zuzel domain users 159 kwi 26 00:20 dane
+a=dane22
+-rw-r--r-- 1 miroslaw.zuzel domain users 0 mar 31 18:06 dane22
+a=dane.txt
+-rw-r--r-- 1 miroslaw.zuzel domain users 40 mar 30 03:16 dane.txt
+
+for a in   /home/*  <=ścieżka dostępu
+do
+echo $a   //   cat $a   <= wykona się operacja wyświetlenia zawartości pliku
+done
+
+Np. - liczymy ile zwykłych plików jest w bieżącym katalogu:
+ile=0
+for  a  in  *
+do
+if  [  -f  „$a”  ]
+then  ile=$(($ile+1))
+fi
+done
+echo $ile
+43
+
+
+
+
+
+
+
+
+
+Np. - wyświetla zawartości zwykłych plików:
+for a in *
+do
+if [  -f $a  ]
+then cat $a
+fi
+done  .
+
+for a in *; do if [ -d "$a" ]; then echo a=$a; ile=$[$ile+1]; fi done
+a=cwicz2
+a=etc
+a=Procesy
+a=Procesy SO NS
+a=Programy SO
+a=public_html
+a=SO NS 2018
+a=SO Stacj. 2018
+[miroslaw.zuzel@orfi ~]$ echo $ile
+8
+[miroslaw.zuzel@orfi ~]$ find . -maxdepth 1 -type d | wc -l                         
+11
+
+Liczymy ile plików i ile katalogów oddzielnie jest w bieżącym katalogu:
+for a in *; do if [ -f "$a" ]; then ilePL=$[$ilePL+1]; elif [ -d "$a" ]; then ileKAT=$(($ileKAT+1)); fi; done
+[miroslaw.zuzel@orfi ~]$ echo $ileKAT
+12
+[miroslaw.zuzel@orfi ~]$ echo $ilePL
+68
+
+Zadanie:
+1) napisać polecenie które podlicza ile plików zwykłych i ile podkatalogów jest w domowym katalogu.
+
+Konstrukcja $(  )  <= wykonuje polecenie w nawiasach:
+
+for a in  $( ls  / )  <= konstrukcja tworzy listę wartości dla zmiennej a
+do 		        (wynik polecenia ls /)
+echo $a
+done
+
+Np.:
+ for a in $(cat w2)
+> do
+> echo a=$a
+> done
+a=-bash:
+a=ls-l:
+a=command
+a=not
+a=found
+[miroslaw.zuzel@orfi ~]$ cat w2
+-bash: ls-l: command not found
+
+Polecenie who  podaje informację o zalogowanych użytkownikach:
+
+s145899  pts/8         2019-04-08 16:53 (213.184.8.155)
+miroslaw.zuzel  pts/9        2019-04-08 16:54 (213.184.8.155)
+s149676  pts/10       2019-04-08 16:54 (213.184.8.155)
+s141298  pts/11       2019-04-08 15:23 (213.184.8.155)
+s145888  pts/12       2019-04-08 16:54 (213.184.8.155)
+s145853  pts/13       2019-04-08 16:54 (213.184.8.155)
+s145896  pts/14       2019-04-08 16:54 (213.184.8.155)
+s116829  pts/15       2019-04-08 17:04 (213.184.8.155)
+s145879  pts/21       2019-04-08 15:26 (213.184.8.155)
+
+Gdybyśmy chcieli z tego tekstu wybrać loginy i  adresy IP to trzeba …
+Mamy polecenie cut  - wycinanie – z wiersza jego fragmentu (-ów):
+-   who | cut   -c1-25              – wytnie z każdego wiersza stosowne znaki;
+-   who | cut   -d” ”   -f1,5    – problem -separatorami są więcej niż 1 spacja.
+Polecenie tr -s „ ” <= zamienia dowolną ilość znaków w „” na pojedynczy znak (tu – spację).
+who | tr -s " "   |   cut -d" " -f1,5
+Wynik:
+miroslaw.zuzel (213.184.8.155)
+s141298 (213.184.8.155)
+s145879 (213.184.8.155)
+
+for  a  in  $(who | tr  -s „ ”   |   cut  -d„ ”  -f1)    <= polecenie who pokazuje kto jest aktualnie
+do 						             zalogowany do systemu (pokazuje
+						             więcej niż tylko loginy)
+echo $a	         spacja	         spacja	             - wycinamy pierwsze pola
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5.	Zadania - pętle:
+1. Napisać konstrukcje wykorzystujące pętle: while, until – które będą wyświetlały wartości liczb całkowitych od 10 do 35 i odwrotnie.
+2. Policzyć – ile w katalogu bieżącym jest podkatalogów oraz wyświetlić ich nazwy.
+3. Napisać konstrukcję liczącą ile:
+-plików o nazwach zaczynających się na literę „a” jest w bieżącym katalogu;
+-plików o nazwach 6-znakowych, gdzie trzecim znakiem jest 'a', jest w katalogu domowym.
+4. Wyświetlić nazwy wszystkich plików mających ustawione prawa dostępu x.
+5. Policzyć ile w katalogu domowym jest podkatalogów, ile plików zwykłych oraz ile plików zerowych.
+
+6.	Skrypty
+
+Skrypt = wykonywalny plik tekstowy (mający prawo x) zawierający polecenia shella i ew. konstrukcje strukturalne, zaczynający się od wiersza:
+#!/bin/bash
+
+W Państwa katalogach domowych jest szereg plików konfiguracyjnych ustalających parametry pracy różnych programów – np. dla shella .bashrc, .bash_history. Polecenie ls ich nie pokazuje – gdyż do codziennej pracy są one często niepotrzebne. Czyli są w pewien sposób „ukryte”.
+Oglądane plików „ukrytych”:
+ls -a
+
+Aby edytor nano lepiej pokazywał składnię proszę w swoim katalogu domowym utworzyć plik:
+.nanorc
+ z zawartością:
+ set linenumbers
+ include "/usr/share/nano/sh.nanorc"
+ include "/usr/share/nano/man.nanorc"
+ include "/usr/share/nano/c.nanorc"
+
+Np. - treść przykładowego skryptu:
+#!/bin/bash
+echo dziala skrypt
+# KOMENTARZ
+#  echo TAK <=komentarz
+echo zawartosc katalogu
+ls
+echo koniec
+
+ 
+
+Aby utworzyć skrypt i go uruchomić należy:
+1. wpisać treść skryptu do pliku "skrypt01":
+nano skrypt01
+2.zmienić prawa dostępu do tego pliku – aby był wykonywalny (prawo x):
+chmod 700 skrypt01
+3.uruchomić:
+. /skrypt01
+lub
+$HOME/skrypt01 – jeżeli jest w katalogu domowym
+lub
+$PWD/skrypt01 – uruchomienie z bieżącego katalogu (to samo co ./skrypt01).
+
+7.	    Zadania – skrypty:
+1. Napisać skrypt, który tworzy dwie zmienne – proszę nadać im wartości: 5 i 10. Następnie wykonuje operacje mnożenia tych zmiennych – wynik zapisuje do trzeciej zmiennej, wyświetla wartości zmiennych oraz wynik.
+2. Napisać skrypt, który podlicza ile plików jest danego typu (zwykły, katalog, dowiązanie itp.) w wybranym katalogu – typ pliku i nazwę katalogu przed podliczaniem proszę zapisać do odpowiednich zmiennych – podpowiedź – przykładowe polecenie:
+b=.
+a=d
+find $b -maxdepth 1 -type $a
+3. Napisać skrypt, który sprawdza czy w bieżącym katalogu istnieje podkatalog o nazwie „notatki” (nazwę proszę wpisać do zmiennej), jeżeli jest to go usuwa, tworzy w bieżącym katalogu ten podkatalog od nowa, zmienia bieżący na nowo utworzony,  tworzy w nim plik „praca” zapisując do niego wynik polecenia „who”.
+

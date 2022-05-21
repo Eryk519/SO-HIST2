@@ -1,0 +1,239 @@
+vTemat: Skrypty -cd.
+
+Tworzenie skryptu:
+1) zapis treści skryptu, np.:
+
+
+
+
+
+
+
+
+
+2) zmiana praw dostępu na rwx:
+chmod 700 Skrypt1;
+
+
+
+
+
+
+
+
+
+
+3) uruchomienie skryptu:
+./Skrypt1  - na żółto -ścieżka dostępu – tu – bieżący katalog.
+
+Zmienne specjalne.
+Poniższy skrypt zawiera specjalne zmienne, które wiążą się ze skryptem.
+Należy ustalić – która zmienna za jakie wartości odpowiada.
+W tym celu należy skrypt uruchomić i przeanalizować wyniki.
+
+Treść skryptu:
+#!/bin/bash
+echo skrypt805
+echo $0
+echo $*
+echo $1 $2  $4
+echo $#
+echo $$
+echo $?
+echo „parametry:” $@
+echo koniec
+
+Należy wykonać następujące kroki:
+1. wpisujemy go do pliku, np.: "skrypt805":
+nano skrypt805
+2.zmieniamy prawa dostępu:
+chmod 700 skrypt805
+3.uruchamiamy:
+./skrypt805   Ala  kot pies 123 887 45abc danie drugie   .
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Wyniki analizy:
+
+Całe polecenie traktowane jest jako wiersz.
+$0 – wyraz o numerze 0 w tym wierszu -
+nazwa skryptu.
+Następne wartości – są traktowane jako
+parametry wejściowe – NIE MA DEKLAROWANIA
+I LIMITU.
+$* - wszystkie parametry
+$1, $2, … - parametry o takich numerach
+(numeracja od 1).
+$# - ilość parametrów.
+$$ - numer procesu w ramach którego
+wykonuje się skrypt.
+$? - tzw. kod powrotu – wartość zwracana
+do SO – mówiąca o tym jak się wykonał
+program – liczba 1-Bajtowa.
+
+
+
+
+
+
+
+
+
+Dobrze = 0 , źle – inna wartość.
+W skrypcie $? - dotyczy poprzedniego polecenia: echo $$.
+Dopiszmy jako ostatni wiersz w skrypcie:
+exit 111.
+
+
+
+
+
+
+
+Wykonanie:
+
+
+
+
+
+
+
+
+
+
+
+Zmienna $? jest też widoczna na poziomie shella.
+
+Zadanie: Napisać skrypt, który pobiera pewną ilość
+parametrów w momencie uruchomienia. Skrypt ma:
+a) sprawdzić czy wśród wczytanych parametrów jest
+wartość "las".
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+b) sprawdzić czy wśród parametrów jest  wartość „a1” -
+jeżeli tak – skrypt ma policzyć ilość zwykłych plików
+w katalogu domowym.
+
+Polecenie read – które pozwala na wczytanie danych przy wykonaniu – np.:
+…
+echo $1 $2  $4
+echo $#
+echo $$
+read  a  # wczytanie wartości do zmiennej a
+echo a=$a
+read -p „Wpisz liczbe:” b # parametr p -
+# tekst komentarza
+echo b=$b
+echo $?
+echo $%
+echo koniec
+exit 221
+Przykład:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Zmienna:
+$@ - Lista parametrów pozycyjnych przekazana do programu powłoki w postaci pojedynczego łańcucha znaków – bez separatorów: spacji, tabulatorów i enterów.
+================  DOTĄD   21.04.2020 i 26.04.2020
+Skrypty a zmienne powłoki i środowiska (informacja).
+Skrypt normalnie uruchamia się w podpowłoce – czyli zmienne powłoki uruchamiającej są w nim niedostępne. Przykład:
+
+-tworzymy skrypt:
+#!/bin/bash
+echo zmienna powloki uruchamiajacej a= $a
+echo zmienna środowiskowa b=$b
+zmieniamy prawa dostępu;
+-przed uruchomieniem skryptu zdefiniować zmienne a=12 i b= „Ala i kot”;
+-zmienną b robimy zmienną środowiskową:
+export b
+-uruchamiamy skrypt.
+
+Powinna być wyświetlona tylko wartość b.
+
+Uruchomienie skryptu z kropką przed nazwą powoduje wykonanie go w tej samej powłoce:
+.skrypt01  <=NIE DZIAŁA - SPRAWDZIĆ
+
+Zadania:
+
+1. Utworzyć skrypt, który uruchamiany jest z parametrami. Jeżeli ilość parametrów jest mniejsza niż 3 – komunikat „Za malo” i zakończenie z kodem 11. Jeżeli równa 3 – to skrypt tworzy plik o nazwie podanej jako drugi parametr, do którego zapisuje zawartość katalogu domowego i kończy pracę z kodem 55. Jeżeli parametrów jest więcej niż 3 – to skrypt podlicza ile jest podkatalogów do 3 poziomu zagłębienia w katalogu bieżącym, zakończenie z kodem 22.
+2. Utworzyć skrypt, który przy uruchomieniu pobiera parametry. Po uruchomieniu skrypt wczytuje tekst - nazwę pliku i sprawdza czy ten plik istnieje w katalogu bieżącym. Jeżeli istnieje – to wyświetlane są nazwy plików o rozmiarze większym od 150B. 
+3. Utworzyć skrypt, który wczytuje parametry i sprawdza czy wartość pierwszego parametru się powtarza wśród pozostałych, i podlicza – ile razy się powtarza.
+4. Utworzyć skrypt, który po uruchomieniu wczytuje wyraz i sprawdza czy wczytana wartość jest równa nazwie uruchomionego skryptu. Wynik – stosowny komunikat.
+5. Utworzyć skrypt, który przy uruchomieniu pobiera pewną ilość parametrów. Wyświetla ich ilość. Jeżeli parametrów jest więcej niż 3 – wyświetla pierwszy i trzeci parametr. Potem sprawdza czy są one sobie równe (te parametry). Jeżeli ilość parametrów nie większa od 3 – stosowny komunikat oraz zakończenie skryptu z kodem 17.
+6. Utworzyć skrypt, który wczytuje parametry i sprawdza czy wartość pierwszego parametru się powtarza wśród pozostałych. Skrypt wczytuje wyraz i sprawdza czy jest on wśród wczytanych w trybie wsadowym parametrów .
+
+Ad Zad.3
+#!/bin/bash
+echo skrypt Zad3
+if [ $# -eq 0 ]
+then
+echo BRAK PARAMETRÓW
+exit 111
+fi
+echo parametry: $*
+licznik=-1
+for a in $*
+do
+if [ $1 = $a ]
+then licznik=$[$licznik+1]
+fi
+done
+echo parametr $1 "powtarza sie " $licznik
+echo razy
+
+Ad. Zad.4
+
+#!/bin/bash
+echo Zad4
+read -p "Podaj wyraz:" a
+if [ -z "$a" ]
+then echo NIE PODANO NIC
+exit 111
+fi
+if [ "$a" = $0 ]
+then echo "ROWNA NAZWIE SKRYPTU"
+else echo NIE
+fi
+echo koniec

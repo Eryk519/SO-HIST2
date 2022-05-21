@@ -1,0 +1,141 @@
+Temat: Konstrukcje strukturalne w shellu.
+ 
+
+W shellu są konstrukcje strukturalne:
+-warunku
+-wyboru
+-pętle.
+
+Konstrukcja decyzyjna (warunkowa) i warunki:
+
+if <warunek>
+then <co na tak>
+else <co na nie> <= opcjonalnie
+fi
+
+<warunek> można zapisać na dwa sposoby:
+if  test  ala = ola
+lub
+if  [ ala = ola ]
+
+Można konstrukcje uruchamiać bezpośrednio z powłoki:
+
+Można instrukcję zapisać w jednym wierszu – muszą być
+średniki:
+ 
+
+
+
+
+
+
+
+                 lub
+
+
+
+
+
+
+Warunki są podzielone na trzy grupy:
+-dotyczące tekstów
+-dotyczące liczb
+-dotyczące plików.
+
+Dotyczące tekstów:
+1) „tekst” <= prawda kiedy niepusty (niezerowy)
+if [ ala ]
+if [ „” ]  => (  if [  ]  )
+
+ 
+
+
+
+
+
+
+
+2) tekst1 = tekst2 <= prawda kiedy równe
+a=ala
+b=ala
+if [ $a = $b ]
+then echo OK
+fi
+3) tekst1 != tekst2 <= prawda kiedy nierówne
+4) -n tekst <= prawda kiedy niezerowy
+a=kglg
+if  [   -n  $a ]; then echo PRAWDA; else echo NIE; fi
+5) -z tekst <= prawda kiedy zerowy
+if  [   -z  “” ]; then echo PRAWDA; else echo NIE; fi
+Przykład:
+ unset a
+if test -z $a; then echo "Teksty rowne"; else echo Teksty nierowne; fi
+Teksty rowne
+
+if [ -z ]; then echo "Prawda"; else echo Nie; fi   
+Prawda
+
+W sytuacji gdy do zmiennych dopisujemy teksty kilkuwyrazowe
+trzeba nazwy zmiennych brać w cudzysłowy, gdyż inaczej – zamiast zmiennych
+wstawiane są zawarte w nich wartości (przed wykonaniem if-a)
+podstawione wartości traktowane są jako kilka łańcuchów:
+a nie jeden.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Dotyczące liczb:
+1) liczba1 -lt liczba2 <= prawda kiedy liczba1 mniejsza    (less then)
+2) liczba1 -le liczba2 <= prawda kiedy liczba1 mniejsza    (less equivalent)
+lub równa
+3) liczba1 -gt liczba2 <= prawda kiedy liczba1 większa     (great then)
+4) liczba1 -ge liczba2 <= prawda kiedy liczba1 większa
+lub równa
+5) liczba1 -eq liczba2 <= prawda kiedy równe  (equivalent)
+6) liczba1 -ne liczba2 <= prawda kiedy nierówne
+ 
+
+Dotyczące plików:
+1) -f nazwa <= czy dany plik jest zwykły
+2) -d nazwa <= czy dany plik jest katalog
+3) -e nazwa <= czy dany plik istnieje
+4) -r nazwa, -w nazwa, -x nazwa <= czy plik ma dane prawa dostępu dla użytkownika (pytającego)
+5) -s nazwa <= czy plik jest niezerowy
+6) -g, -u <= dotyczą przekazywania praw własności
+7) -h, -L (dowiązanie symboliczne), -b, -c, -p, -S (socket),   … - takie
+same kryteria jak w poleceniu find.
+
+Niuanse składni:
+if  [  ] ; then echo Ok ; else echo Nie ; fi
+Nie
+if echo AAA; then echo OK; else echo NIE; fi
+AAA
+OK
+Każde polecenie (program) zwraca do systemu informację
+o tym jak się wykonało – 1B, (C/C++ - exit) – jeżeli
+się wykonało dobrze – zwraca prawdę (kod 0).
+Prawda jest utożsamiana z wartością 0, fałsz z wartością różną od zera.
+
+Zadania:
+1.	Utworzyć dwie liczby, sprawdzić która z nich jest mniejsza.
+2.	Sprawdzić czy w katalogu domowym jest plik zwykły „dane.txt”.
+ 
+3.	Utworzyć zmienną, sprawdzić czy zmienna zawiera łańcuch niezerowy.
+4.	Sprawdzić czy bieżącym katalogiem jest domowy.
+if   [  $HOME = $PWD ]; then echo tak; else echo nie; fi
+5.    Zdefiniować dwie zmienne – z tekstami – porównać ich wartości, stosowne komentarze.
+6.    Zdefiniować dwie zmienne – z “liczbami” - porównać je jako liczby. Jeżeli pierwsza jest większa od drugiej – stosowny komunikat oraz zwiększyć pierwszą liczbę o 100 I wyświetlić jej wartość, jeżeli nie – również komunikat, pierwszą liczbę podzielić przez 3,  drugą pomnożyć przez 5, wyświetlić ich wartości.
+
+
+
+
+
