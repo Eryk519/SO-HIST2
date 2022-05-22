@@ -1,0 +1,708 @@
+Przyk³ady skryptów
+
+Przyk³adowe skrypty w BASHu. Najlepiej jest siê uczyæ analizuj¹c przyk³ady.
+
+#!/bin/bash
+# Program odczytuje ze standardowego wejscia liczbe i sprawdza czy istnieje
+# odpowiedni argument skryptu.
+
+echo "Który argument (liczony od 1) ? "
+read i
+
+if [ $i -le $# -a $i -gt 0 ]; then  # jesli i <= LICZBA_ARGUMENTOW i i > 0
+  echo -n "Argument nr $i istnieje i wynosi: "
+  shift `expr $i - 1`
+  echo $1
+else
+  echo "Argument nr $i nie istnieje"
+fi
+
+
+
+
+
+#!/bin/bash
+#
+# Skrypt kopiuje pliki z przyrostkiem ~ do katalogu BACKUP
+
+if [ -e "./BACKUP" -a  ! -d "./BACKUP" ]; then  # jezeli istnieje plik BACKUP
+                                                # i nie jest katalogiem
+  echo "BACKUP juz istnieje i nie jest katalogiem"
+  exit
+fi
+
+if [ ! -d "./BACKUP" ]; then   # jezli nie istnieje katalog BACKUP
+  mkdir "./BACKUP"
+fi
+
+for i in *~; do
+  echo "Kopiujê plik $i do katalogu BACKUP"
+  cp "$i" "./BACKUP"
+done
+
+
+
+
+
+
+
+#!/bin/bash
+# Skrypt znajduje wszystkie pliki, ktore maja w swojej tresci swoja nazwe
+
+for i in *; do
+  if [ -f "$i" ]; then     # jezli to jest plik
+    z=`cat $i | grep $i`   # wypisanie pliku i poszukiwanie w jego tresci nazwy
+    if [ -n "$z" ]; then   # jezeli plik zawiera w swojej tresci swoja nazwe
+      echo "Plik $i zawiera w swojej treœci swoja nazwê"
+    fi
+  fi
+done
+
+
+
+
+
+
+#!/bin/bash
+# Skrypt wczytuje liczby i wypisuje max., min. i sumê
+
+if [ $# -lt 1 ]; then           # je¿eli nie podano argumentów
+  echo "Podaj nazwe pliku!"
+  exit
+fi
+
+if [ ! -f "$1" ]; then          # je¿eli podany jako argument plik nie istnieje
+  echo "Plik $1 nie istnieje!"
+  exit
+fi
+
+rozmiar=`cat "$1" | wc -l`      # liczba wierszy w pliku
+if [ $rozmiar -eq 0 ]; then     # je¿eli liczba wierszy w pliku wynosi 0
+  echo "Plik $1 jest pusty!"
+  exit
+fi
+
+min=`cat "$1" | head -n 1`     # na poczatku max i min równaj¹ siê pierwszej
+max=$min                       #   liczbie w pliku
+suma=0                         # na pocz¹tku suma wynosi 0
+
+while [ $rozmiar -gt 0 ]; do   # przeczytaj ca³y plik
+  liczba=`cat "$1" | tail -n $rozmiar | head -n 1`  # pojedynczy wiersz pliku
+
+  if [ $liczba -gt $max ]; then    # je¿eli liczba > ni¿ dotychczasowy max
+    max=$liczba                    #   max staje siê liczb¹
+  elif [ $liczba -lt $min ]; then  # je¿eli liczba < ni¿ dotychczasowy min
+    min=$liczba                    #   min staje siê liczb¹
+  fi
+
+  suma=$[ $suma + $liczba]         # zwiêkszamy sumê o kolejn¹ liczbê
+
+  rozmiar=$[ $rozmiar - 1 ]        # rozmiar pliku zmniejszamy o 1
+done
+
+echo "Max. liczba $max"
+echo "Min. liczba $min"
+echo "Suma liczb $suma"
+
+
+
+
+
+
+
+
+
+#!/bin/bash
+# Procedura zamieniaj¹ca liczbê na jej reprezentacjê s³own¹
+
+procedura()
+{
+  if [ $1 -lt 0 -a $1 -gt 99 ]; then
+    echo "Liczba w nieprawid³owym zakresie!"
+    exit
+  fi
+
+  case $1 in
+    10) echo "dziesiêæ" ;;
+    11) echo "jedenaœcie" ;;
+    12) echo "dwanaœcie" ;;
+    13) echo "trzynaœcie" ;;
+    14) echo "czternaœcie" ;;
+    15) echo "piêtnaœcie" ;;
+    16) echo "szesnaœcie" ;;
+    17) echo "siedemnaœcie" ;;
+    18) echo "osiemnaœcie" ;;
+    19) echo "dziewiêtnaœcie" ;;
+    2?) echo -n "dwadzieœcia " ;;   # -n -- nie przechodŸ do nastêpnego wiersza
+    3?) echo -n "trzydzieœci " ;;
+    4?) echo -n "czterdzieœci " ;;
+    5?) echo -n "piêædziesi¹t " ;;
+    6?) echo -n "szeœædziesi¹t " ;;
+    7?) echo -n "siedemdziesi¹t " ;;
+    8?) echo -n "osiemdziesi¹t " ;;
+    9?) echo -n "dziewiêædziesi¹t " ;;
+  esac
+
+  if [ $i -lt 10 -o $i -gt 19 ]; then  # je¿eli liczba < 10 i liczba > 19
+    case $1 in
+       0) echo "zero" ;;
+      ?0) echo "" ;;
+      *1) echo "jeden" ;;
+      *2) echo "dwa" ;;
+      *3) echo "trzy" ;;
+      *4) echo "cztery" ;;
+      *5) echo "piêæ" ;;
+      *6) echo "szeœæ" ;;
+      *7) echo "siedem" ;;
+      *8) echo "osiem" ;;
+      *9) echo "dziewiêæ" ;;
+    esac
+  fi
+}
+
+
+# test procedury
+i=0
+while [ $i -le 99 ]; do
+  procedura $i
+
+  i=$[ $i + 1 ];
+done
+
+
+
+
+
+
+
+
+#!/bin/bash
+# Skrypt wyznacza n-t¹ liczbê Fibbonacciego
+# Program wyznacza liczbê metod¹ iteracyjn¹
+
+echo "Podaj numer liczby Fibbonacciego: "
+read i
+
+if [ $i -lt 1 ]; then
+  echo "Wymagany numer wiêkszy od zera!"
+  exit
+fi
+
+# 1 1 2 3 5 8 13 21
+
+if [ $i -le 2 ]; then      # dwie pierwsze liczby Fibbonacciego to jedynki
+  echo "1";
+  exit
+fi
+
+i=$[ $i - 2 ]
+a=1
+b=1
+
+while [ $i -gt 0 ]; do     # wykonuje pêtlê je¿eli i > 0
+  c=$[ $a + $b ]
+  a=$b
+  b=$c
+
+  i=$[ $i - 1 ]
+done
+
+echo $c
+
+
+
+
+
+
+
+
+
+#!/bin/bash
+# ./skr1 plik1 [ plik2 [ plikn ] ]
+# Program wypisuje naprzemiennie kolejne linie plikow podanych jako parametry.
+
+if [ $# -lt 1 ]; then
+    echo 'brak parametru(ow) !'
+    echo './skr1 plik1 [ plik2 [ plikn ] ]'
+    exit
+fi
+
+lineNumber=1
+pusty=0    # liczba plikow, ktore zostaly wyswietlone w calosci
+
+while [ $pusty -ne $# ]; do
+
+    pusty=0
+    color=31
+    for i in $*; do
+        color=$[ color + 1 ]
+        if [ $lineNumber -gt `wc -l "$i" | awk '{print $1}'` ]; then 
+            pusty=$[ $pusty + 1 ]
+        else
+            echo -e "\\033[0;${color}m"`cat "$i" | head -n $lineNumber\
+	    | tail -n 1`"\\033[0;37m"   # wyswietla linie
+        fi
+    done
+    lineNumber=$[ $lineNumber + 1 ]     # kolejna linia pliku
+
+done
+
+
+
+
+
+
+
+
+#!/bin/bash
+# ./skr2
+# Program przeszukuje drzewo katalogow i 
+# usuwa pliki *.jpg mniejsze niz 5000bajtow - calkiem przydatny.
+
+rozmiar=0
+for i in `find -type f -printf "%s:%p\n" | grep .jpg$`; do
+    rozmiar=${i%:*}
+    if [ $rozmiar -lt 5000 ]; then
+     rm "${i#*:}"
+    fi
+done
+
+
+
+
+
+
+
+#!/bin/bash
+# ./skr3 katalog1 [ katalog2 [ katalog3 ] ]
+# Program przeszukuje zadane katalogi i wyswietla informacje o tych
+# wszystkich plikach wewnatrz tych katalogow, ktore maja w swojej
+# tresci swoja nazwe.
+
+if [ $# -eq 0 ]; then
+    echo 'brak parametru(ow) !'
+    echo './skr3 katalog1 [ katalog2 [ katalog3 ] ]'
+    exit
+fi
+
+while [ $# -gt 0 -a -d "$1" ]; do
+   licznik=0
+   for i in `find $1 -type f -printf "%p " 2>/dev/null`; do 
+      # a tu bedzie sztuczka znana z C ...
+      [ "`grep -l ${i##*/} $i 2>/dev/null`" ] && licznik=$[ $licznik + 1 ]
+   done   
+
+   echo katalog $1 ma $licznik plikow, ktore maja w swojej tresci swoja nazwe
+   shift
+done
+
+
+
+
+
+
+
+#!/bin/bash
+# ./skr4 katalog
+# Program przeszukuje zadany katalog i wyswietla informacje
+# o najwiekszym i najmniejszym pliku.
+
+if [ $# -lt 1 -o $# -gt 1 ]; then
+    echo 'bledny parametr !'
+    echo './skr4 katalog'
+    exit
+fi
+
+katalog=$1
+
+max=0         # taki sposob dzialania (poprzez nadanie malej i ogromnej
+min=99999999  # wartosci) nie jest zadowalajacy z punktu widzenia algorytmiki
+              # ale spelnia wymogi praktyczne
+for i in `find $katalog -type f -printf '%s:%p\n' | sort -n -t ' '`; do
+    w=${i%%:*}
+    if [ $w -gt $max ]; then
+        max=$w
+        maxn="$i"
+    fi
+    if [ $w -lt $min ]; then
+        min=$w
+        minn="$i"
+    fi
+    echo "$i"
+done
+
+echo 'najwiekszy:' "$maxn"
+echo 'najmniejszy:' "$minn"
+
+
+
+
+
+
+
+#!/bin/bash
+# ./skr5 katalog plik
+# Program przeszukuje podany katalog w celu odnalezienia wszystkich
+# plikow 'plik' - wynik poszukiwan posortowany jest wedlug rozmiaru.
+
+find "$1" -type f -name "$2" -printf "%f %s\n" | sort -n -t' ' -k 2 
+
+
+
+
+
+
+
+#!/bin/bash
+# ./skr6 katalogZrodlowy katalogDocelowy
+# Program przeszukuje katalogZrodlowy i do kazdego pliku lub
+# katalogu tworzy w katalogDocelowym link o nazwie plikX (gdzie
+# X to kolejny numer) lub o nazwie katalogX dla katalogu.
+# UWAGA: nalezy podac sciezki bezwzgledne
+
+if [ $# -ne 2 ]; then
+    echo 'bledne parametry !'
+    echo './skr6 katalogZrodlowy katalogDocelowy'
+    exit
+fi
+ 
+Nplk=0
+Nktl=0
+
+if [ ! -d "$2" ]; then
+    mkdir "$2"
+fi
+
+for i in `find "$1"`; do
+
+    if [ -f "$i" ]; then     # plik
+        ln -s "$i" "$2/plik$Nplk"
+        Nplk=$[ $Nplk + 1 ]
+    elif [ -d "$i" ]; then   # katalog
+        ln -s "$i" "$2/katalog$Nktl"
+        Nktl=$[ $Nktl + 1 ]
+    fi
+
+done
+
+
+
+
+
+
+
+#!/bin/bash
+# ./skr7 [-r] katalog
+# Program wyszukuje w zadanym katalogu linki, ktore na nic nie wskazuja.
+# Jezeli podano parametr `-r' to nastepuje proba usuniecia tych linkow.
+
+if [ $# -lt 1 -o $# -gt 2 ]; then
+    echo 'zla liczba parametrow !'
+    echo './skr7 [-r] katalog'
+    exit
+fi
+
+if [ "$1" = '-r' ]; then
+    katalog="$2"
+else
+    katalog="$1"
+fi
+
+echo 'linki, ktore na nic nie wskazuja:'
+for i in `find "$katalog" -type l`; do
+    if [ ! -f `readlink "$i"` -a ! -d `readlink "$i"` ]; then
+        echo -n "$i  ->  `readlink "$i"`"
+        if [ "$1" = '-r' ]; then
+            rm -f "$i" 2>/dev/null
+            if [ -L "$i" ]; then
+                echo -n '  nie udalo sie skasowac'
+            else
+                echo -n '  udalo sie skasowac'
+            fi 
+        fi 
+        echo
+    fi
+done
+
+
+
+
+
+
+
+#!/bin/bash
+# ./skr8 katalog
+# Program dla kazdego podkatalogu zadanego katalogu wyswietla
+# sumaryczna wielkosc znajdujacych sie tam plikow.
+
+if [ $# -ne 1 ]; then
+    echo 'zla liczba parametrow !'
+    echo './skr8 katalog'
+    exit
+fi
+
+for i in `find "$1" -type d`; do
+   tmp=0
+   for j in `find "$i" -type f -printf "%s "`; do
+       tmp=$[ $tmp + $j ]  
+   done 
+   echo "$i  $tmp"
+done
+
+
+
+
+
+
+
+#!/bin/bash
+# ./skr9 plik rozmiar
+# Program dzieli plik na czesci po `rozmiar' wierszy.
+
+if [ $# -ne 2 ]; then
+    echo 'bledna liczba parametrow !'
+    exit
+fi
+
+rozmiar=`wc -l "$1"`
+rozmiar=${rozmiar% *}
+
+Nplk=0
+while [ $[ $2 * $Nplk ] -lt $rozmiar ]; do
+
+    cat "$1" | tail -n $[ $rozmiar - $2 * $Nplk ] | head -n $2 
+    echo '-------'
+
+    Nplk=$[ $Nplk + 1 ]
+
+done
+
+
+
+
+
+
+Zaliczeniowy skrypt eksternistyczny, SOP 1999/2000
+
+Napisac skrypt flat, który sp³aszcza strukturê katalogów w nastêpuj¹cy
+sposób i korzysta z nastêpuj¹cych za³o¿eñ:
+
+* skrypt przyjmuje jedn¹ opcjê -l, po której nastêpuje liczba oznaczaj¹ca
+  ile poziomów w drzewie katalogów nale¿y sp³aszczyæ. Liczba 0 oznacza brak
+  sp³aszczania, 1 bie¿emy pod uwagê tylko podkatalogi, 2 podkatalogi i ich podkatalogi
+  itd.. Brak opcji -l oznacza sp³aszczanie ca³ej struktury.
+
+* je¿eli skrypt dostanie (oprocz opcji -l) dwa parametry, to pierwszy parametr
+  oznacza korzeñ drzewa katalogów do sp³aszczenia, a drugi katalog w jakim umieszczamy
+  wynik. Je¿eli skrypt dostanie jeden parametr, to jest nim katalog wynikowy, a
+  splaszczamy wszystko poczawszy od katalogu bie¿¹cego. Odpowiednie przyk³ady wywo³añ:
+
+  flat -l 10 katalog_sp³aszczany tu_umieœæ_wynik
+  flat tu_umieœæ_wynik
+  
+  W pierwszym przypadku sp³aszczamy do 10 poziomów (je¿eli jest ich mniej to oczywiœcie
+  wszystkie) drzewa o korzeniu katalog_sp³aszczany i wynik umieszczamy w nowo zak³adanym
+  katalogu tu_umieœæ_wynik. W drugim przypadku sp³aszczamy maksymalnie bie¿¹cy katalog,
+  a wynik umieszczamy w tu_umieœæ_wynik. Mo¿emy przyj¹æ, ¿e wynik nie mo¿e byæ umieszczany
+  wewn¹trz katalog_splaszczany.
+
+* sp³aszczenie wygl¹da nastêpuj¹co - dla ka¿dego podkatalogu w drzewie katalog_sp³aszczany,
+  obojêtnie na którym poziomie, w katalogu tu_umieœæ_wynik powstaje jeden katalog o
+  takiej samej nazwie.
+  (*) Je¿eli nazwy podkatalogów powtarzaj¹ siê to nale¿y poprzedziæ je jednoznacznym
+  prefiksem (np. œcie¿ka do niego). W ka¿dym z tych nowo utworzonych katalogów zak³adamy
+  linki (dowi¹zania) symboliczne wskazuj¹ce na katalogi, które teraz s¹ ju¿ w katalogu
+  tu_umieœæ_wynik, a które pierwotnie by³y podkatalogami. Nazwy tych linków s¹ takie jak
+  nazwy podkatalogów w pierwotnym drzewie (patrz (*) - czyli w przypadku powtórzeñ linki
+  o starych nazwach wskazuj¹ na katalogi o nowych nazwach (z prefiksami)).
+* pliki pozostaj¹ w tych podkatalogach, w których by³y do tej pory.
+
+Przyk³ad. Mamy drzewo:
+
+            a
+           / \
+          /   \
+         b     c
+        /     /|\
+       /     / | \
+      d     e  f  d
+
+Po wykonaniu sp³aszczenia mamy: W katalogu tu_umieœæ_wynik znajduje siê 7 podkatalogów
+o nazwach a, b, c, d, e, f, c_d (ta ostatnia nazwa to przyk³ad). Podkatalog a zawiera
+wszystkie pliki z a (w drzewie pierwotnym) oraz linki: o nazwie b, wskazuj¹cy na b oraz
+o nazwie c wskazuj¹cy na c. Podkatalog b zawiera wszystkie pliki z b oraz linki o nazwie
+d, wskazuj¹cy na katalog d. Podkatalog c zawiera wszystkie pliki z c oraz linki e, f i d
+wskazuj¹ce odpowiednio na e, f i c_d. Podkatalogi e, f i c_d zawieraj¹ wszystkie pliki,
+które zawiera³y do tej pory e, f oraz d bêd¹ce podkatalogami c.
+
+
+#!/bin/bash
+
+########################################
+#         Zaliczeniowy skrypt          #
+#           eksternistyczny            #
+#            SOP 1999/2000             #
+########################################
+#           Sebastian Pawlak           #
+#     nr albumu: s1222, grupa: 311     #
+########################################
+
+### zmienne globalne
+#####################
+
+katalogSplaszczany=`pwd`      # aktualny katalog
+tuUmiescWynik=`pwd`
+maxGlebokoscSplaszczania=-1   # (-1) -> splaszcza cala strukture
+wynikPlus=''
+
+### generowanie jednoznacznego prefiksu
+### funkcja konwertuje napis zawierajacy sciezke (ze slash`ami) na napis
+### zawierajacy te sciezke ale zamiast slash`ow beda znaki "_"
+#########################################################################
+
+function konwertuj() {
+    local s="$1"
+    local d="$1"'x'
+    local wynik=$wynikPlus
+    
+    while [ "$s" != "$d" ]; do
+        d="${s%%/*}"   # pierwszy wyraz (od poczatku do slash`a)
+        s="${s#*/}"    # wszystko oprocz pierwszego wyrazu
+        wynik="$wynik$d"
+        if [ "$s" != "$d" ]; then
+	    wynik=$wynik'_'
+	fi
+    done
+        
+    echo "$wynik"
+}
+
+
+### glowna funkcja skryptu ; rekurencyjnie przeglada podkatalogi, tworzy ich
+### kopie w katalogu "tuUmiescWynik" (uwzglednia powtarzajace sie nazwy),
+### kopiuje pliki, tworzy linki
+#############################################################################
+
+function splaszcz() {
+    local katalog="$1"          # katalog
+    local aktualnaGlebokosc=$2  # glebokosc w drzewie rekurencyjnym
+    local docelowy
+
+    docelowy="$tuUmiescWynik/`konwertuj "$katalog"`"  # kat. docelowy z prefiksem
+    mkdir "$docelowy" 2>/dev/null    # tworzy katalog w "tuUmiescWynik"
+
+    echo "$katalog --> $docelowy"
+    cp `find $katalog -type f -maxdepth 1` $docelowy 2>/dev/null # kopiow. plikow
+
+    # "kopiowanie" linkow z odswiezaniem ich wskazan
+    for i in `find $katalog -type l -maxdepth 1 -printf "%p\n"`; do
+	linkdest=`find $katalog -name "${i##*/}" -type l -maxdepth 1 -printf "%l"`
+
+        tmpKatalogBazowy=`pwd`
+	cd "$katalog" # katalog z linkiem
+	if [ -z "${linkdest%/*}" ]; then               # katalog lub plik w korzeniu
+	    rzeczywisteWskazanie="/${linkdest##*/}"
+	elif [ "${linkdest%/*}" != "$linkdest" ]; then # wskazanie na katalog
+	    tmpKatalog=`pwd`
+	    cd "${linkdest%/*}"
+	    rzeczywisteWskazanie="`pwd`/${linkdest##*/}"
+	    cd "$tmpKatalog"
+	else                                           # wskazanie na plik
+	    rzeczywisteWskazanie="`pwd`/${linkdest##*/}"
+	fi
+	cd "$tmpKatalogBazowy"
+
+        tmpContain=`echo "$rzeczywisteWskazanie" | grep ^"$katalogSplaszczany"`
+	if [ -n "$tmpContain" ]; then  # link wskazuje na element w drzewie
+	    ln -s "../`konwertuj "$rzeczywisteWskazanie"`" "$docelowy/${i##*/}"
+	else # link wskazuje poza drzewo splaszczane
+	    ln -s "$rzeczywisteWskazanie" "$docelowy/${i##*/}"
+	fi	
+    done 
+    
+    
+    for k in `find $katalog -type d -mindepth 1 -maxdepth 1`; do
+        if [ $maxGlebokoscSplaszczania -eq -1 \
+                 -o $aktualnaGlebokosc -lt $maxGlebokoscSplaszczania ]; then
+            splaszcz "$k" $[ $aktualnaGlebokosc + 1 ]  # rekurencyjne wywolanie
+            ln -s "$celLinka" "$docelowy" 2>/dev/null  # tworzenie linka
+        fi
+    done
+  
+    celLinka="$docelowy"  # nazwa aktualnego katalogu jest linkiem dla katalogu
+                          # polozonego plycej w zaglebieniu rekurencyjnym
+}
+
+
+
+#######################################
+### sterowanie przebiegiem programu ###
+#######################################
+
+echo 'flat, s1222'
+
+### identyfikacja parametrow przekazanych do skryptu
+###################################################
+
+while [ $# -ne 0 ]; do
+    if [ `expr "$1" = '-l'` -eq 1 ]; then
+        shift
+        maxGlebokoscSplaszczania=$1
+    else
+        katalogSplaszczany=$tuUmiescWynik
+        tuUmiescWynik="$1"
+    fi
+    shift
+done
+
+echo -n 'glebokosc splaszczania: '
+if [ $maxGlebokoscSplaszczania -eq -1 ]; then
+    echo 'cala struktura'
+else
+    echo $maxGlebokoscSplaszczania
+fi
+
+if [ ! -d "$katalogSplaszczany" ]; then
+    echo "katalog splaszczany nie istnieje"
+    exit
+fi
+
+if [ -d "$tuUmiescWynik" ]; then
+    echo "katalog docelowy juz istnieje"
+    exit
+fi
+
+mkdir "$tuUmiescWynik" 2>/dev/null  # tworzy "tuUmiescWynik" (jesli nie istnial)
+
+aktualnyKat=`pwd`
+cd "$katalogSplaszczany"
+katalogSplaszczany=`pwd`
+cd "$aktualnyKat"
+cd "$tuUmiescWynik"
+tuUmiescWynik=`pwd`
+cd "$aktualnyKat"
+
+tmpKt=`echo "$katalogSplaszczany" | grep '/'`
+if [ -z "$tmpKt" ]; then
+    wynikPlus='_'
+fi
+
+echo '   katalog splaszczany:' $katalogSplaszczanyRoot
+echo '      katalog wynikowy:' $tuUmiescWynik
+
+if [ $maxGlebokoscSplaszczania -eq 0 ]; then
+    echo "brak splaszczania"
+    exit
+fi
+
+if [ "$katalogSplaszczany" = "$tuUmiescWynik" ]; then
+    echo "katalog wynikowy i katalog splaszczany to ten sam katalog !"
+    exit
+fi
+
+### wywolanie glownej funkcji, ktora dokona splaszczenia struktury podkatalogow
+###############################################################################
+
+splaszcz "$katalogSplaszczany" 0   # glowna funkcja
+
+echo 'koniec.'
